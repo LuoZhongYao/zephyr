@@ -6,4 +6,4 @@ set(NO_QEMU_SERIAL_BT_SERVER 1)
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(bluetooth)
 
-target_sources(app PRIVATE src/bluetooth.c)
+target_sources(app PRIVATE src/bluetooth.c src/preinit.c)

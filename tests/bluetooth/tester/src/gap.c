@@ -926,7 +926,7 @@ uint8_t tester_init_gap(void)
 {
 	int err;
 
-	err = bt_enable(tester_init_gap_cb);
+	err = bt_enable(tester_init_gap_cb, NULL, NULL);
 	if (err < 0) {
 		LOG_ERR("Unable to enable Bluetooth: %d", err);
 		return BTP_STATUS_FAILED;

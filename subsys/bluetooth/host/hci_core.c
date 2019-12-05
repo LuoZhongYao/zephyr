@@ -6379,7 +6379,7 @@ static void hci_rx_thread(void)
 }
 #endif /* !CONFIG_BT_RECV_IS_RX_THREAD */
 
-int bt_enable(bt_ready_cb_t cb)
+int bt_enable(bt_ready_cb_t cb, bt_preinit_cb_t preinit, void *data)
 {
 	int err;
 
@@ -6432,6 +6432,13 @@ int bt_enable(bt_ready_cb_t cb)
 	}
 
 	bt_monitor_send(BT_MONITOR_OPEN_INDEX, NULL, 0);
+
+	if (preinit) {
+		err = preinit(data);
+		if (err) {
+			return err;
+		}
+	}
 
 	if (!cb) {
 		return bt_init();
