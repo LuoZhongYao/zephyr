@@ -99,9 +99,12 @@ static struct bt_conn_cb conn_callbacks = {
 	.disconnected = disconnected,
 };
 
-static void bt_ready(void)
+static void bt_ready(int err)
 {
-	int err;
+	if (err) {
+		FAIL("Bluetooth init failed (err %d)\n", err);
+		return;
+	}
 
 	printk("Bluetooth initialized\n");
 
@@ -145,13 +148,11 @@ static void test_con2_main(void)
 	static int notify_count;
 	int err;
 
-	err = bt_enable(NULL);
+	err = bt_enable(bt_ready, NULL, NULL);
 	if (err) {
 		FAIL("Bluetooth init failed (err %d)\n", err);
 		return;
 	}
-
-	bt_ready();
 
 	bt_conn_cb_register(&conn_callbacks);
 

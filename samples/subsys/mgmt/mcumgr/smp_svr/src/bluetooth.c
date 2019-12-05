@@ -75,7 +75,7 @@ void start_smp_bluetooth(void)
 	k_work_init(&advertise_work, advertise);
 
 	/* Enable Bluetooth. */
-	int rc = bt_enable(bt_ready);
+	int rc = bt_enable(bt_ready, NULL, NULL);
 
 	if (rc != 0) {
 		LOG_ERR("Bluetooth init failed (err %d)", rc);
