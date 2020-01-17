@@ -29,8 +29,8 @@
 
 #include "../util.h"
 
-static K_THREAD_STACK_DEFINE(tx_stack, 256);
-static K_THREAD_STACK_DEFINE(rx_stack, 256);
+static K_THREAD_STACK_DEFINE(tx_stack, 512);
+static K_THREAD_STACK_DEFINE(rx_stack, 512);
 
 static struct k_thread tx_thread_data;
 static struct k_thread rx_thread_data;
