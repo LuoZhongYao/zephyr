@@ -29,8 +29,8 @@
 
 #include "../util.h"
 
-static K_KERNEL_STACK_DEFINE(tx_stack, 256);
-static K_KERNEL_STACK_DEFINE(rx_stack, 256);
+static K_KERNEL_STACK_DEFINE(tx_stack, 512);
+static K_KERNEL_STACK_DEFINE(rx_stack, 512);
 
 static struct k_thread tx_thread_data;
 static struct k_thread rx_thread_data;
@@ -61,7 +61,7 @@ static bool reliable_packet(uint8_t type)
 }
 
 /* FIXME: Correct timeout */
-#define H5_RX_ACK_TIMEOUT	K_MSEC(250)
+#define H5_RX_ACK_TIMEOUT	K_MSEC(20)
 #define H5_TX_ACK_TIMEOUT	K_MSEC(250)
 
 #define SLIP_DELIMITER	0xc0
@@ -619,6 +619,7 @@ static void tx_thread(void)
 		switch (h5.link_state) {
 		case UNINIT:
 			/* FIXME: send sync */
+			h5_send(sync_req, HCI_3WIRE_LINK_PKT, sizeof(sync_req));
 			k_sleep(K_MSEC(100));
 			break;
 		case INIT:
