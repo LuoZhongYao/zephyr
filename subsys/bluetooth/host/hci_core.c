@@ -3460,6 +3460,7 @@ int bt_enable(bt_ready_cb_t cb)
 		return bt_init();
 	}
 
+	cb(-ENODEV);
 	k_work_submit(&bt_dev.init);
 	return 0;
 }
