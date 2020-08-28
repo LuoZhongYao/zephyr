@@ -655,7 +655,7 @@ void main(void)
 		 DT_GPIO_FLAGS(DT_ALIAS(led3), gpios));
 
 	/* Initialize the Bluetooth Subsystem */
-	err = bt_enable(bt_ready);
+	err = bt_enable(bt_ready, NULL, NULL);
 	if (err) {
 		printk("Bluetooth init failed (err %d)\n", err);
 	}

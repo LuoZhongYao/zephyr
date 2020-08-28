@@ -248,7 +248,7 @@ static void clear_friendship(bool force, bool disable)
 	lpn->groups_changed = 1U;
 
 	if (cfg->hb_pub.feat & BT_MESH_FEAT_LOW_POWER) {
-		bt_mesh_heartbeat_send();
+		(void)bt_mesh_heartbeat_send(NULL, NULL);
 	}
 
 	if (disable) {
@@ -749,7 +749,7 @@ static void lpn_timeout(struct k_work *work)
 		if (IS_ENABLED(CONFIG_BT_MESH_LPN_ESTABLISHMENT)) {
 			bt_mesh_scan_disable();
 		}
-		/* fall through */
+		__fallthrough;
 	case BT_MESH_LPN_ENABLED:
 		send_friend_req(lpn);
 		break;
@@ -966,7 +966,7 @@ int bt_mesh_lpn_friend_update(struct bt_mesh_net_rx *rx,
 		BT_INFO("Friendship established with 0x%04x", lpn->frnd);
 
 		if (cfg->hb_pub.feat & BT_MESH_FEAT_LOW_POWER) {
-			bt_mesh_heartbeat_send();
+			(void)bt_mesh_heartbeat_send(NULL, NULL);
 		}
 
 		if (lpn_cb) {

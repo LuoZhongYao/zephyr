@@ -71,7 +71,10 @@ static void test_con2_tick(bs_time_t HW_device_time)
 
 static const struct bt_data ad[] = {
 	BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
-	BT_DATA_BYTES(BT_DATA_UUID16_ALL, 0x0d, 0x18, 0x0f, 0x18, 0x05, 0x18),
+	BT_DATA_BYTES(BT_DATA_UUID16_ALL,
+		      BT_UUID_16_ENCODE(BT_UUID_HRS_VAL),
+		      BT_UUID_16_ENCODE(BT_UUID_BAS_VAL),
+		      BT_UUID_16_ENCODE(BT_UUID_CTS_VAL)),
 };
 
 static void connected(struct bt_conn *conn, uint8_t err)
@@ -99,9 +102,12 @@ static struct bt_conn_cb conn_callbacks = {
 	.disconnected = disconnected,
 };
 
-static void bt_ready(void)
+static void bt_ready(int err)
 {
-	int err;
+	if (err) {
+		FAIL("Bluetooth init failed (err %d)\n", err);
+		return;
+	}
 
 	printk("Bluetooth initialized\n");
 
@@ -145,13 +151,11 @@ static void test_con2_main(void)
 	static int notify_count;
 	int err;
 
-	err = bt_enable(NULL);
+	err = bt_enable(bt_ready, NULL, NULL);
 	if (err) {
 		FAIL("Bluetooth init failed (err %d)\n", err);
 		return;
 	}
-
-	bt_ready();
 
 	bt_conn_cb_register(&conn_callbacks);
 

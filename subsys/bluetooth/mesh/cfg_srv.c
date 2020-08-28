@@ -779,7 +779,7 @@ static void gatt_proxy_set(struct bt_mesh_model *model,
 	}
 
 	if (cfg->hb_pub.feat & BT_MESH_FEAT_PROXY) {
-		bt_mesh_heartbeat_send();
+		(void)bt_mesh_heartbeat_send(NULL, NULL);
 	}
 
 send_status:
@@ -885,7 +885,7 @@ static void relay_set(struct bt_mesh_model *model,
 		       BT_MESH_TRANSMIT_INT(cfg->relay_retransmit));
 
 		if ((cfg->hb_pub.feat & BT_MESH_FEAT_RELAY) && change) {
-			bt_mesh_heartbeat_send();
+			(void)bt_mesh_heartbeat_send(NULL, NULL);
 		}
 	} else {
 		BT_WARN("Invalid Relay value 0x%02x", buf->data[0]);
@@ -2210,7 +2210,7 @@ static void net_key_update(struct bt_mesh_model *model,
 			send_net_key_status(model, ctx, idx, STATUS_SUCCESS);
 			return;
 		}
-		/* fall through */
+		__fallthrough;
 	case BT_MESH_KR_PHASE_2:
 	case BT_MESH_KR_PHASE_3:
 		send_net_key_status(model, ctx, idx, STATUS_CANNOT_UPDATE);
@@ -2710,7 +2710,7 @@ static void friend_set(struct bt_mesh_model *model,
 	}
 
 	if (cfg->hb_pub.feat & BT_MESH_FEAT_FRIEND) {
-		bt_mesh_heartbeat_send();
+		(void)bt_mesh_heartbeat_send(NULL, NULL);
 	}
 
 send_status:
@@ -3196,13 +3196,39 @@ const struct bt_mesh_model_op bt_mesh_cfg_srv_op[] = {
 	BT_MESH_MODEL_OP_END,
 };
 
+static void hb_publish_end_cb(int err, void *cb_data)
+{
+	struct bt_mesh_cfg_srv *cfg = cb_data;
+	uint16_t period_ms;
+
+	period_ms = hb_pwr2(cfg->hb_pub.period, 1) * 1000U;
+	if (period_ms && cfg->hb_pub.count > 1) {
+		k_delayed_work_submit(&cfg->hb_pub.timer, K_MSEC(period_ms));
+	}
+
+	if (cfg->hb_pub.count != 0xffff) {
+		cfg->hb_pub.count--;
+	}
+}
+
+static void hb_publish_start_cb(uint16_t duration, int err, void *cb_data)
+{
+	if (err) {
+		hb_publish_end_cb(err, cb_data);
+	}
+}
+
 static void hb_publish(struct k_work *work)
 {
+	static const struct bt_mesh_send_cb publish_cb = {
+		.start = hb_publish_start_cb,
+		.end = hb_publish_end_cb,
+	};
 	struct bt_mesh_cfg_srv *cfg = CONTAINER_OF(work,
 						   struct bt_mesh_cfg_srv,
 						   hb_pub.timer.work);
 	struct bt_mesh_subnet *sub;
-	uint16_t period_ms;
+	int err;
 
 	BT_DBG("hb_pub.count: %u", cfg->hb_pub.count);
 
@@ -3218,15 +3244,9 @@ static void hb_publish(struct k_work *work)
 		return;
 	}
 
-	period_ms = hb_pwr2(cfg->hb_pub.period, 1) * 1000U;
-	if (period_ms && cfg->hb_pub.count > 1) {
-		k_delayed_work_submit(&cfg->hb_pub.timer, K_MSEC(period_ms));
-	}
-
-	bt_mesh_heartbeat_send();
-
-	if (cfg->hb_pub.count != 0xffff) {
-		cfg->hb_pub.count--;
+	err = bt_mesh_heartbeat_send(&publish_cb, cfg);
+	if (err) {
+		hb_publish_end_cb(err, cfg);
 	}
 }
 

@@ -123,7 +123,7 @@ static sys_slist_t engine_obj_inst_list;
 static sys_slist_t engine_observer_list;
 static sys_slist_t engine_service_list;
 
-static K_THREAD_STACK_DEFINE(engine_thread_stack,
+static K_KERNEL_STACK_DEFINE(engine_thread_stack,
 			      CONFIG_LWM2M_ENGINE_STACK_SIZE);
 static struct k_thread engine_thread_data;
 
@@ -424,8 +424,8 @@ static int engine_add_observer(struct lwm2m_message *msg,
 	}
 
 	/* defaults from server object */
-	attrs.pmin = lwm2m_server_get_pmin(msg->ctx->sec_obj_inst);
-	attrs.pmax = lwm2m_server_get_pmax(msg->ctx->sec_obj_inst);
+	attrs.pmin = lwm2m_server_get_pmin(msg->ctx->srv_obj_inst);
+	attrs.pmax = lwm2m_server_get_pmax(msg->ctx->srv_obj_inst);
 
 	/* TODO: observe dup checking */
 
@@ -2761,8 +2761,8 @@ static int lwm2m_write_attr_handler(struct lwm2m_engine_obj *obj,
 		}
 
 		/* defaults from server object */
-		nattrs.pmin = lwm2m_server_get_pmin(msg->ctx->sec_obj_inst);
-		nattrs.pmax = lwm2m_server_get_pmax(msg->ctx->sec_obj_inst);
+		nattrs.pmin = lwm2m_server_get_pmin(msg->ctx->srv_obj_inst);
+		nattrs.pmax = lwm2m_server_get_pmax(msg->ctx->srv_obj_inst);
 
 		ret = update_attrs(obj, &nattrs);
 		if (ret < 0) {
@@ -4525,7 +4525,7 @@ static int lwm2m_engine_init(struct device *dev)
 	/* start sock receive thread */
 	k_thread_create(&engine_thread_data,
 			&engine_thread_stack[0],
-			K_THREAD_STACK_SIZEOF(engine_thread_stack),
+			K_KERNEL_STACK_SIZEOF(engine_thread_stack),
 			(k_thread_entry_t) socket_receive_loop,
 			NULL, NULL, NULL,
 			/* Lowest priority cooperative thread */

@@ -59,3 +59,11 @@
 		status = "okay";
 	};
 };
+
+&mac {
+	status = "okay";
+};
+
+&rng {
+	status = "okay";
+};

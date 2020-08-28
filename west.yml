@@ -47,7 +47,7 @@ manifest:
       revision: 6835bfc741bf15e98fb7971293913f770df6081f
       path: modules/hal/esp-idf
     - name: fatfs
-      revision: 9ee6b9b9511151d0d64a74d532d39c6f2bbd4f16
+      revision: 13697783bf653dfdf17c57129ce8e181634e5970
       path: modules/fs/fatfs
     - name: hal_cypress
       revision: a12d92816a53a521d79cefcf5c38b9dc8a4fed6e
@@ -56,7 +56,7 @@ manifest:
       revision: f1fa8241f8786198ba41155413243de36ed878a5
       path: modules/hal/infineon
     - name: hal_nordic
-      revision: cb9e75ebfea8a8312678b2359c6b41b051a95177
+      revision: 4420ac72664b8be0b8630e2bd8cf76367c62d228
       path: modules/hal/nordic
     - name: hal_openisa
       revision: 40d049f69c50b58ea20473bee14cf93f518bf262
@@ -68,7 +68,7 @@ manifest:
       revision: a1ec761014740a08699720298dd37ad4da360840
       path: modules/hal/microchip
     - name: hal_silabs
-      revision: 78da967feeac0d51219ef733cc3ccf643336589f
+      revision: 69c3e1e6e167767cb75aa2b468df4ade05988cdb
       path: modules/hal/silabs
     - name: hal_st
       revision: 5b3ec3e182d4310e8943cc34c6c70ae57d9711da
@@ -83,22 +83,22 @@ manifest:
       revision: 87e9e7f2c5b4e238236fe703db61ba23e48dc2ef
       path: modules/hal/libmetal
     - name: lvgl
-      revision: 74fc2e753a997bd71cefa34dd9c56dcb954b42e2
+      revision: 928b61c7c8ef5f770f10e6fd36d4fea0cf375b5e
       path: modules/lib/gui/lvgl
     - name: mbedtls
       path: modules/crypto/mbedtls
       revision: 4bf099f1254332d16dcd931ccea0a88d24a7d3c7
     - name: mcuboot
-      revision: d52aff5065ab5995f785877a834112461ff93526
+      revision: 3ab5ab307cbfd1f7d3028dc7461b35c156d3e5ab
       path: bootloader/mcuboot
     - name: mcumgr
-      revision: 898a5a7f5224be8345e58eca3b9a84389ed61d15
+      revision: cfe5eb98a9493017448846fd1a44a9340bd0a22f
       path: modules/lib/mcumgr
     - name: net-tools
       revision: 1c4fdba512b268033a4cf926bddd323866c3261a
       path: tools/net-tools
     - name: hal_nxp
-      revision: 478f03a71256aeb2890e685ebf5a1dc6832a6b5f
+      revision: 727b36cfe9e2f2aa5eb88d608e6334c8d548cee9
       path: modules/hal/nxp
     - name: open-amp
       revision: 724f7e2a4519d7e1d40ef330042682dea950c991
@@ -107,7 +107,7 @@ manifest:
       revision: 170a2579dd890f78f5056f0959cdb9c9bea259a1
       path: modules/lib/loramac-node
     - name: openthread
-      revision: 168248677cacbf9cc5e0c94b8f0682259cfd5f40
+      revision: 656802a76acd2920b74ee4d49363f70aeb3b9621
       path: modules/lib/openthread
     - name: segger
       revision: 6fcf61606d6012d2c44129edc033f59331e268bc
@@ -135,7 +135,7 @@ manifest:
       revision: c39888ff74acf421eeff9a7514fa9b172c3373f7
     - name: trusted-firmware-m
       path: modules/tee/tfm
-      revision: 7e51033f7bf4ad54a008e5c3cdf244d1d6954af0
+      revision: 7b763c0dc3bd3600f7e73aecca51d82a45cf2e35
 
   self:
     path: zephyr

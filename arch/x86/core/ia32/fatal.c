@@ -18,7 +18,14 @@
 #include <inttypes.h>
 #include <exc_handle.h>
 #include <logging/log.h>
+#include <x86_mmu.h>
+#include <sys/mem_manage.h>
+
 LOG_MODULE_DECLARE(os);
+
+#ifdef CONFIG_DEBUG_COREDUMP
+unsigned int z_x86_exception_vector;
+#endif
 
 __weak void z_debug_fatal_hook(const z_arch_esf_t *esf) { ARG_UNUSED(esf); }
 
@@ -58,11 +65,15 @@ NANO_CPU_INT_REGISTER(_kernel_oops_handler, NANO_SOFT_IRQ,
 FUNC_NORETURN static void generic_exc_handle(unsigned int vector,
 					     const z_arch_esf_t *pEsf)
 {
+#ifdef CONFIG_DEBUG_COREDUMP
+	z_x86_exception_vector = vector;
+#endif
+
 	z_x86_unhandled_cpu_exception(vector, pEsf);
 }
 
 #define _EXC_FUNC(vector) \
-FUNC_NORETURN void handle_exc_##vector(const z_arch_esf_t *pEsf) \
+FUNC_NORETURN __used static void handle_exc_##vector(const z_arch_esf_t *pEsf) \
 { \
 	generic_exc_handle(vector, pEsf); \
 }
@@ -140,7 +151,7 @@ struct task_state_segment _df_tss = {
 	.es = DATA_SEG,
 	.ss = DATA_SEG,
 	.eip = (uint32_t)df_handler_top,
-	.cr3 = (uint32_t)&z_x86_kernel_ptables
+	.cr3 = Z_MEM_PHYS_ADDR((uint32_t)&z_x86_kernel_ptables)
 };
 
 static __used void df_handler_bottom(void)
@@ -181,14 +192,14 @@ static FUNC_NORETURN __used void df_handler_top(void)
 	_df_esf.eflags = _main_tss.eflags;
 
 	/* Restore the main IA task to a runnable state */
-	_main_tss.esp = (uint32_t)(ARCH_THREAD_STACK_BUFFER(
+	_main_tss.esp = (uint32_t)(Z_KERNEL_STACK_BUFFER(
 		z_interrupt_stacks[0]) + CONFIG_ISR_STACK_SIZE);
 	_main_tss.cs = CODE_SEG;
 	_main_tss.ds = DATA_SEG;
 	_main_tss.es = DATA_SEG;
 	_main_tss.ss = DATA_SEG;
 	_main_tss.eip = (uint32_t)df_handler_bottom;
-	_main_tss.cr3 = (uint32_t)&z_x86_kernel_ptables;
+	_main_tss.cr3 = z_mem_phys_addr(&z_x86_kernel_ptables);
 	_main_tss.eflags = 0U;
 
 	/* NT bit is set in EFLAGS so we will task switch back to _main_tss

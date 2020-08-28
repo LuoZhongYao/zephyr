@@ -244,8 +244,8 @@ rirq_path:
 	j_s [r2]
 #endif
 
-#if defined(CONFIG_SYS_POWER_MANAGEMENT)
 .macro exit_tickless_idle
+#if defined(CONFIG_SYS_POWER_MANAGEMENT)
 	clri r0 /* do not interrupt exiting tickless idle operations */
 	mov_s r1, _kernel
 	ld_s r0, [r1, _kernel_offset_to_idle] /* requested idle duration */
@@ -258,10 +258,8 @@ rirq_path:
 
 _skip_sys_power_save_idle_exit:
 	seti r0
-.endm
-#else
-	#define exit_tickless_idle
 #endif
+.endm
 
 /* when getting here, r3 contains the interrupt exit stub to call */
 SECTION_FUNC(TEXT, _isr_demux)
@@ -281,7 +279,7 @@ SECTION_FUNC(TEXT, _isr_demux)
 	bl read_timer_start_of_isr
 #endif
 
-#if defined(CONFIG_TRACING)
+#if defined(CONFIG_TRACING_ISR)
 	bl sys_trace_isr_enter
 #endif
 	/* cannot be done before this point because we must be able to run C */
@@ -311,7 +309,7 @@ irq_hint_handled:
 	jl_s.d [r1]
 	ld_s r0, [r0] /* delay slot: ISR parameter into r0  */
 
-#ifdef CONFIG_TRACING_ISR
+#if defined(CONFIG_TRACING_ISR)
 	bl sys_trace_isr_exit
 #endif
 

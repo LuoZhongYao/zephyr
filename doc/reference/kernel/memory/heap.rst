@@ -38,7 +38,7 @@ Releasing Memory
 ================
 
 Memory allocated with :cpp:func:`k_heap_alloc()` must be released using
-:cpp:func:`k_heap_free()`.  Similar to stanard C ``free()``, the pointer
+:cpp:func:`k_heap_free()`.  Similar to standard C ``free()``, the pointer
 provided must be either a ``NULL`` value or a pointer previously
 returned by :cpp:func:`k_heap_alloc()` for the same heap.  Freeing a
 ``NULL`` value is defined to have no effect.
@@ -124,7 +124,9 @@ The size of the heap memory pool is specified using the
 :option:`CONFIG_HEAP_MEM_POOL_SIZE` configuration option.
 
 By default, the heap memory pool size is zero bytes. This value instructs
-the kernel not to define the heap memory pool object.
+the kernel not to define the heap memory pool object. The maximum size is limited
+by the amount of available memory in the system. The project build will fail in
+the link stage if the size specified can not be supported.
 
 Allocating Memory
 =================

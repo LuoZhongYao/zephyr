@@ -147,6 +147,8 @@ static int chan_send(struct bt_att_chan *chan, struct net_buf *buf,
 		     bt_att_chan_sent_t cb)
 {
 	struct bt_att_hdr *hdr;
+	struct net_buf_simple_state state;
+	int err;
 
 	hdr = (void *)buf->data;
 
@@ -174,7 +176,15 @@ static int chan_send(struct bt_att_chan *chan, struct net_buf *buf,
 			return -EAGAIN;
 		}
 
-		return bt_l2cap_chan_send(&chan->chan.chan, buf);
+		/* bt_l2cap_chan_send does actually return the number of bytes
+		 * that could be sent immediatelly.
+		 */
+		err = bt_l2cap_chan_send(&chan->chan.chan, buf);
+		if (err < 0) {
+			return err;
+		}
+
+		return 0;
 	}
 
 	if (hdr->code == BT_ATT_OP_SIGNED_WRITE_CMD) {
@@ -188,10 +198,23 @@ static int chan_send(struct bt_att_chan *chan, struct net_buf *buf,
 		}
 	}
 
+	net_buf_simple_save(&buf->b, &state);
+
 	chan->sent = cb ? cb : chan_cb(buf);
 
-	return bt_l2cap_send_cb(chan->att->conn, BT_L2CAP_CID_ATT, buf,
-				att_cb(chan->sent), &chan->chan.chan);
+	/* Take a ref since bt_l2cap_send_cb takes ownership of the buffer */
+	err = bt_l2cap_send_cb(chan->att->conn, BT_L2CAP_CID_ATT,
+				net_buf_ref(buf), att_cb(chan->sent),
+				&chan->chan.chan);
+	if (!err) {
+		net_buf_unref(buf);
+		return 0;
+	}
+
+	net_buf_simple_restore(&buf->b, &state);
+
+	return err;
+
 }
 
 static int process_queue(struct bt_att_chan *chan, struct k_fifo *queue)
@@ -231,11 +254,16 @@ static int chan_req_send(struct bt_att_chan *chan, struct bt_att_req *req)
 	/* Save request state so it can be resent */
 	net_buf_simple_save(&req->buf->b, &req->state);
 
-	/* Keep a reference for resending in case of an error */
+	/* Keep a reference for resending the req in case the security
+	 * needs to be changed.
+	 */
 	err = chan_send(chan, net_buf_ref(req->buf), NULL);
-	if (err < 0) {
+	if (err) {
+		/* Drop the extra reference if buffer could not be sent but
+		 * don't reset the buffer as it will likelly be pushed back to
+		 * request queue to be send later.
+		 */
 		net_buf_unref(req->buf);
-		chan->req = NULL;
 	}
 
 	return err;
@@ -2663,7 +2691,11 @@ static void bt_att_encrypt_change(struct bt_l2cap_chan *chan,
 	 * outstanding request about security failure.
 	 */
 	if (hci_status) {
-		att_handle_rsp(att_chan, NULL, 0, BT_ATT_ERR_AUTHENTICATION);
+		if (att_chan->req) {
+			att_handle_rsp(att_chan, NULL, 0,
+				       BT_ATT_ERR_AUTHENTICATION);
+		}
+
 		return;
 	}
 

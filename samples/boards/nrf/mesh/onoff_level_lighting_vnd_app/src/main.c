@@ -16,7 +16,7 @@
 #include "transition.h"
 
 #if defined(CONFIG_MCUMGR)
-#include <mgmt/smp_bt.h>
+#include <mgmt/mcumgr/smp_bt.h>
 #include "smp_svr.h"
 #endif
 
@@ -169,7 +169,7 @@ void main(void)
 	ps_settings_init();
 
 	/* Initialize the Bluetooth Subsystem */
-	err = bt_enable(NULL);
+	err = bt_enable(NULL, NULL, NULL);
 	if (err) {
 		printk("Bluetooth init failed (err %d)\n", err);
 		return;

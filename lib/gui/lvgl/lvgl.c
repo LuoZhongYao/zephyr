@@ -8,7 +8,7 @@
 #include <zephyr.h>
 #include <lvgl.h>
 #include "lvgl_display.h"
-#ifdef CONFIG_LVGL_FILESYSTEM
+#ifdef CONFIG_LVGL_USE_FILESYSTEM
 #include "lvgl_fs.h"
 #endif
 #ifdef CONFIG_LVGL_POINTER_KSCAN
@@ -25,20 +25,24 @@ LOG_MODULE_REGISTER(lvgl);
 static lv_disp_buf_t disp_buf;
 
 #define BUFFER_SIZE (CONFIG_LVGL_BITS_PER_PIXEL * ((CONFIG_LVGL_VDB_SIZE * \
-			CONFIG_LVGL_HOR_RES * CONFIG_LVGL_VER_RES) / 100) / 8)
+			CONFIG_LVGL_HOR_RES_MAX * CONFIG_LVGL_VER_RES_MAX) / 100) / 8)
 
 #define NBR_PIXELS_IN_BUFFER (BUFFER_SIZE * 8 / CONFIG_LVGL_BITS_PER_PIXEL)
 
-static uint8_t buf0[BUFFER_SIZE];
+/* NOTE: depending on chosen color depth buffer may be accessed using uint8_t *,
+ * uint16_t * or uint32_t *, therefore buffer needs to be aligned accordingly to
+ * prevent unaligned memory accesses.
+ */
+static uint8_t buf0[BUFFER_SIZE] __aligned(4);
 #ifdef CONFIG_LVGL_DOUBLE_VDB
-static uint8_t buf1[BUFFER_SIZE];
+static uint8_t buf1[BUFFER_SIZE] __aligned(4);
 #endif
 
 #endif /* CONFIG_LVGL_BUFFER_ALLOC_STATIC */
 
 #if CONFIG_LVGL_LOG_LEVEL != 0
 static void lvgl_log(lv_log_level_t level, const char *file, uint32_t line,
-		const char *dsc)
+		const char *func, const char *dsc)
 {
 	/* Convert LVGL log level to Zephyr log level
 	 *
@@ -60,8 +64,9 @@ static void lvgl_log(lv_log_level_t level, const char *file, uint32_t line,
 
 	ARG_UNUSED(file);
 	ARG_UNUSED(line);
+	ARG_UNUSED(func);
 
-	Z_LOG(zephyr_level, "%s", dsc);
+	Z_LOG(zephyr_level, "%s", log_strdup(dsc));
 }
 #endif
 
@@ -75,14 +80,14 @@ static int lvgl_allocate_rendering_buffers(lv_disp_drv_t *disp_drv)
 
 	display_get_capabilities(display_dev, &cap);
 
-	if (cap.x_resolution <= CONFIG_LVGL_HOR_RES) {
+	if (cap.x_resolution <= CONFIG_LVGL_HOR_RES_MAX) {
 		disp_drv->hor_res = cap.x_resolution;
 	} else {
 		LOG_ERR("Horizontal resolution is larger than maximum");
 		err = -ENOTSUP;
 	}
 
-	if (cap.y_resolution <= CONFIG_LVGL_VER_RES) {
+	if (cap.y_resolution <= CONFIG_LVGL_VER_RES_MAX) {
 		disp_drv->ver_res = cap.y_resolution;
 	} else {
 		LOG_ERR("Vertical resolution is larger than maximum");
@@ -258,7 +263,7 @@ static int lvgl_init(struct device *dev)
 
 	lv_init();
 
-#ifdef CONFIG_LVGL_FILESYSTEM
+#ifdef CONFIG_LVGL_USE_FILESYSTEM
 	lvgl_fs_init();
 #endif
 

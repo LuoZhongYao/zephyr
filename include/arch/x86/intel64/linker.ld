@@ -9,9 +9,12 @@
 #define ROMABLE_REGION RAM
 #define RAMABLE_REGION RAM
 
-#ifdef CONFIG_X86_MMU
-	#define MMU_PAGE_SIZE	KB(4)
-	#define MMU_PAGE_ALIGN	. = ALIGN(MMU_PAGE_SIZE);
+/* Used to align areas with separate memory permission characteristics
+ * so that the page permissions can be set in the MMU. Without this,
+ * the kernel is just one blob with the same RWX permissions on all RAM
+ */
+#ifdef CONFIG_SRAM_REGION_PERMISSIONS
+	#define MMU_PAGE_ALIGN	. = ALIGN(CONFIG_MMU_PAGE_SIZE);
 #else
 	#define MMU_PAGE_ALIGN
 #endif
@@ -153,12 +156,7 @@ SECTIONS
 
 	__bss_num_dwords = (__bss_end - __bss_start) >> 2;
 
-	SECTION_PROLOGUE(_NOINIT_SECTION_NAME, (NOLOAD), ALIGN(16))
-	{
-	*(.noinit)
-	*(.noinit.*)
-	#include <snippets-noinit.ld>
-	} GROUP_DATA_LINK_IN(RAMABLE_REGION, RAMABLE_REGION)
+#include <linker/common-noinit.ld>
 
 #include <snippets-sections.ld>
 
@@ -172,10 +170,11 @@ SECTIONS
 #include <snippets-ram-sections.ld>
 #include <linker/common-ram.ld>
 #include <linker/cplusplus-ram.ld>
+#include <arch/x86/pagetables.ld>
+
+/* Must be last in RAM */
 #include <linker/kobject.ld>
 
-	. = ALIGN(8);
-	MMU_PAGE_ALIGN
 	_image_ram_end = .;
 	_end = .;
 

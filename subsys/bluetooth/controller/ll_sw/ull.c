@@ -223,7 +223,8 @@ static MFIFO_DEFINE(pdu_rx_free, sizeof(void *), PDU_RX_CNT);
 #endif
 
 #define PDU_RX_POOL_SIZE (PDU_RX_NODE_POOL_ELEMENT_SIZE * \
-			  (RX_CNT + BT_CTLR_MAX_CONNECTABLE))
+			  (RX_CNT + BT_CTLR_MAX_CONNECTABLE + \
+			   BT_CTLR_ADV_SET))
 
 static struct {
 	void *free;
@@ -231,7 +232,8 @@ static struct {
 } mem_pdu_rx;
 
 #define LINK_RX_POOL_SIZE (sizeof(memq_link_t) * (RX_CNT + 2 + \
-						  BT_CTLR_MAX_CONN))
+						  BT_CTLR_MAX_CONN + \
+						  BT_CTLR_ADV_SET))
 static struct {
 	uint8_t quota_pdu; /* Number of un-utilized buffers */
 
@@ -558,6 +560,7 @@ void ll_rx_dequeue(void)
 	/* handle object specific clean up */
 	switch (rx->type) {
 #if defined(CONFIG_BT_CTLR_ADV_EXT)
+#if defined(CONFIG_BT_OBSERVER)
 	case NODE_RX_TYPE_EXT_1M_REPORT:
 	case NODE_RX_TYPE_EXT_2M_REPORT:
 	case NODE_RX_TYPE_EXT_CODED_REPORT:
@@ -581,6 +584,48 @@ void ll_rx_dequeue(void)
 		}
 	}
 	break;
+#endif /* CONFIG_BT_OBSERVER */
+
+#if defined(CONFIG_BT_BROADCASTER)
+	case NODE_RX_TYPE_EXT_ADV_TERMINATE:
+	{
+		struct ll_adv_set *adv;
+
+		adv = ull_adv_set_get(rx->handle);
+
+#if defined(CONFIG_BT_PERIPHERAL)
+		struct lll_conn *lll_conn = adv->lll.conn;
+
+		if (!lll_conn) {
+			adv->is_enabled = 0U;
+
+			break;
+		}
+
+		LL_ASSERT(!lll_conn->link_tx_free);
+
+		memq_link_t *link = memq_deinit(&lll_conn->memq_tx.head,
+						&lll_conn->memq_tx.tail);
+		LL_ASSERT(link);
+
+		lll_conn->link_tx_free = link;
+
+		struct ll_conn *conn = (void *)HDR_LLL2EVT(lll_conn);
+
+		ll_conn_release(conn);
+		adv->lll.conn = NULL;
+
+		ll_rx_release(adv->node_rx_cc_free);
+		adv->node_rx_cc_free = NULL;
+
+		ll_rx_link_release(adv->link_cc_free);
+		adv->link_cc_free = NULL;
+#endif /* CONFIG_BT_PERIPHERAL */
+
+		adv->is_enabled = 0U;
+	}
+	break;
+#endif /* CONFIG_BT_BROADCASTER */
 #endif /* CONFIG_BT_CTLR_ADV_EXT */
 
 #if defined(CONFIG_BT_CONN)
@@ -646,7 +691,7 @@ void ll_rx_dequeue(void)
 			 * enabled status bitmask
 			 */
 			bm = (IS_ENABLED(CONFIG_BT_OBSERVER) &&
-			      ull_scan_is_enabled(0) << 1) |
+			      (ull_scan_is_enabled(0) << 1)) |
 			     (IS_ENABLED(CONFIG_BT_BROADCASTER) &&
 			      ull_adv_is_enabled(0));
 
@@ -707,9 +752,8 @@ void ll_rx_dequeue(void)
 
 #if defined(CONFIG_BT_CTLR_USER_EXT)
 	case NODE_RX_TYPE_USER_START ... NODE_RX_TYPE_USER_END:
+		__fallthrough;
 #endif /* CONFIG_BT_CTLR_USER_EXT */
-
-	/* fall through */
 
 	/* Ensure that at least one 'case' statement is present for this
 	 * code block.
@@ -811,7 +855,7 @@ void ll_rx_mem_release(void **node_rx)
 			}
 		}
 
-		/* passthrough */
+		__fallthrough;
 		case NODE_RX_TYPE_DC_PDU:
 #endif /* CONFIG_BT_CONN */
 
@@ -820,10 +864,11 @@ void ll_rx_mem_release(void **node_rx)
 #endif /* CONFIG_BT_OBSERVER */
 
 #if defined(CONFIG_BT_CTLR_ADV_EXT)
-			/* fallthrough */
+			__fallthrough;
 		case NODE_RX_TYPE_EXT_1M_REPORT:
 		case NODE_RX_TYPE_EXT_2M_REPORT:
 		case NODE_RX_TYPE_EXT_CODED_REPORT:
+		case NODE_RX_TYPE_EXT_ADV_TERMINATE:
 #endif /* CONFIG_BT_CTLR_ADV_EXT */
 
 #if defined(CONFIG_BT_CTLR_SCAN_REQ_NOTIFY)
@@ -1740,6 +1785,12 @@ static inline void rx_demux_event_done(memq_link_t *link,
 		ull_conn_done(done);
 		break;
 #endif /* CONFIG_BT_CONN */
+
+#if defined(CONFIG_BT_CTLR_ADV_EXT) && defined(CONFIG_BT_BROADCASTER)
+	case EVENT_DONE_EXTRA_TYPE_ADV:
+		ull_adv_done(done);
+		break;
+#endif /* CONFIG_BT_CTLR_ADV_EXT && CONFIG_BT_BROADCASTER */
 
 #if defined(CONFIG_BT_OBSERVER)
 #if defined(CONFIG_BT_CTLR_ADV_EXT)
