@@ -407,6 +407,12 @@ static void usb_register_descriptors(const uint8_t *usb_descriptors)
  *
  * @return true if the descriptor was found, false otherwise
  */
+__weak bool usb_get_vendor_descriptor(uint16_t type_index, uint16_t lang_id,
+				      int32_t *len, uint8_t **data)
+{
+	return false;
+}
+
 static bool usb_get_descriptor(uint16_t type_index, uint16_t lang_id,
 		int32_t *len, uint8_t **data)
 {
@@ -463,7 +469,9 @@ static bool usb_get_descriptor(uint16_t type_index, uint16_t lang_id,
 		}
 	} else {
 		/* nothing found */
+
 		LOG_DBG("Desc %x not found!", type_index);
+		found = usb_get_vendor_descriptor(type_index, lang_id, len, data);
 	}
 	return found;
 }

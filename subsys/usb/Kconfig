@@ -30,6 +30,24 @@ config USB_DEVICE_PID
 	help
 	  USB device product ID. MUST be configured by vendor.
 
+config USB_DEVICE_CLASS
+	hex "USB Device Class"
+	default 0x00
+	help
+	  USB device class. MUST be configured by vendor.
+
+config USB_DEVICE_SUBCLASS
+	hex "USB Device Subclass"
+	default 0x00
+	help
+	  USB device subclass. MUST be configured by vendor.
+
+config USB_DEVICE_PROTOCOL
+	hex "USB Device Protocol"
+	default 0x00
+	help
+	  USB device protocol. MUST be configured by vendor.
+
 config USB_DEVICE_MANUFACTURER
 	string "USB manufacturer name"
 	default "ZEPHYR"
