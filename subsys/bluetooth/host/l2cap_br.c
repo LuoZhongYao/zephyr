@@ -1434,6 +1434,7 @@ static void l2cap_br_conn_pend(struct bt_l2cap_chan *chan, uint8_t status)
 		l2cap_br_conf(chan);
 	} else if (atomic_test_and_clear_bit(BR_CHAN(chan)->flags,
 					     L2CAP_FLAG_CONN_PENDING)) {
+#if 0
 		buf = bt_l2cap_create_pdu(&br_sig_pool, 0);
 
 		hdr = net_buf_add(buf, sizeof(*hdr));
@@ -1447,6 +1448,7 @@ static void l2cap_br_conn_pend(struct bt_l2cap_chan *chan, uint8_t status)
 
 		l2cap_br_chan_send_req(BR_CHAN(chan), buf,
 				       L2CAP_BR_CONN_TIMEOUT);
+#endif
 	}
 }
 
