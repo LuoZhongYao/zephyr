@@ -128,7 +128,7 @@ l2cap_br_chan_alloc_cid(struct bt_conn *conn, struct bt_l2cap_chan *chan)
 	 * No action needed if there's already a CID allocated, e.g. in
 	 * the case of a fixed channel.
 	 */
-	if (ch->rx.cid > 0) {
+	if (ch->rx.cid > 0 && ch->rx.cid < L2CAP_BR_CID_DYN_START) {
 		return ch;
 	}
 
