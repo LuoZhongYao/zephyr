@@ -30,6 +30,12 @@ config USB_DEVICE_PID
 	help
 	  USB device product ID. MUST be configured by vendor.
 
+config USB_DEVICE_RELNUM
+	hex "USB BCD Device release number"
+	default 0x0209
+	help
+	  USB device bcd release number. MUST be configured by vendor.
+
 config USB_DEVICE_CLASS
 	hex "USB Device Class"
 	default 0x00

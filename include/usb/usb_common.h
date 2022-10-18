@@ -85,8 +85,12 @@
 /* Set USB version to 2.1 so that the host will request the BOS descriptor */
 #define USB_2_1				0x0210
 
+#ifdef CONFIG_USB_DEVICE_RELNUM
+#define BCDDEVICE_RELNUM CONFIG_USB_DEVICE_RELNUM
+#else
 #define BCDDEVICE_RELNUM		(BCD(KERNEL_VERSION_MAJOR) << 8 | \
 					BCD(KERNEL_VERSION_MINOR))
+#endif
 
 /* Highest value of Frame Number in SOF packets. */
 #define USB_SOF_MAX			2047

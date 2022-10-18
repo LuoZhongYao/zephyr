@@ -31,7 +31,7 @@
 
 #define IN_RANGE(val, min, max) (val >= min && val <= max)
 
-#define SDP_DATA_MTU 200
+#define SDP_DATA_MTU 667
 
 #define SDP_MTU (SDP_DATA_MTU + sizeof(struct bt_sdp_hdr))
 
