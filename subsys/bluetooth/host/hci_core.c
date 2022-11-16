@@ -2889,6 +2889,7 @@ static int set_event_mask(void)
 		mask |= BT_EVT_MASK_REMOTE_NAME_REQ_COMPLETE;
 		mask |= BT_EVT_MASK_REMOTE_FEATURES;
 		mask |= BT_EVT_MASK_ROLE_CHANGE;
+		mask |= BT_EVT_MASK_MODE_CHANGE;
 		mask |= BT_EVT_MASK_PIN_CODE_REQ;
 		mask |= BT_EVT_MASK_LINK_KEY_REQ;
 		mask |= BT_EVT_MASK_LINK_KEY_NOTIFY;
