@@ -74,7 +74,7 @@ NET_BUF_POOL_FIXED_DEFINE(sdp_pool, CONFIG_BT_MAX_CONN,
 
 #define SDP_CLIENT_CHAN(_ch) CONTAINER_OF(_ch, struct bt_sdp_client, chan.chan)
 
-#define SDP_CLIENT_MTU 64
+#define SDP_CLIENT_MTU SDP_MTU
 
 struct bt_sdp_client {
 	struct bt_l2cap_br_chan              chan;
