@@ -44,7 +44,7 @@ uint32_t __noinit z_timestamp_idle;  /* timestamp when CPU goes idle */
 #endif
 
 /* init/main and idle threads */
-K_THREAD_STACK_DEFINE(z_main_stack, CONFIG_MAIN_STACK_SIZE);
+K_THREAD_PINNED_STACK_DEFINE(z_main_stack, CONFIG_MAIN_STACK_SIZE);
 struct k_thread z_main_thread;
 
 #ifdef CONFIG_MULTITHREADING
@@ -61,7 +61,7 @@ static K_KERNEL_STACK_ARRAY_DEFINE(z_idle_stacks, CONFIG_MP_NUM_CPUS,
  * of this area is safe since interrupts are disabled until the kernel context
  * switches to the init thread.
  */
-K_KERNEL_STACK_ARRAY_DEFINE(z_interrupt_stacks, CONFIG_MP_NUM_CPUS,
+K_KERNEL_PINNED_STACK_ARRAY_DEFINE(z_interrupt_stacks, CONFIG_MP_NUM_CPUS,
 			    CONFIG_ISR_STACK_SIZE);
 
 #ifdef CONFIG_SYS_CLOCK_EXISTS
