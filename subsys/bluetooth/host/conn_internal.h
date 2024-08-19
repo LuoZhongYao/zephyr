@@ -85,6 +85,8 @@ struct bt_conn_br {
 	uint8_t			pairing_method;
 	/* remote LMP features pages per 8 bytes each */
 	uint8_t			features[LMP_MAX_PAGES][8];
+	uint8_t			mode;
+	uint16_t		interval;
 
 	struct bt_keys_link_key	*link_key;
 };
@@ -318,6 +320,7 @@ void bt_conn_set_state(struct bt_conn *conn, bt_conn_state_t state);
 int bt_conn_le_conn_update(struct bt_conn *conn,
 			   const struct bt_le_conn_param *param);
 
+void notify_mode_changed(struct bt_conn *conn);
 void notify_remote_info(struct bt_conn *conn);
 
 void notify_le_param_updated(struct bt_conn *conn);

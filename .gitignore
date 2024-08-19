@@ -37,6 +37,7 @@ bsim_bt_out
 scripts/grub
 doc/reference/kconfig/*.rst
 doc/doc.warnings
+compile_commands.json
 .*project
 .settings
 .envrc

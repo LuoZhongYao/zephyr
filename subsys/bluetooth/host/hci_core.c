@@ -2156,6 +2156,8 @@ static const struct event_handler normal_events[] = {
 		      sizeof(struct bt_hci_evt_conn_request)),
 	EVENT_HANDLER(BT_HCI_EVT_CONN_COMPLETE, bt_hci_conn_complete,
 		      sizeof(struct bt_hci_evt_conn_complete)),
+	EVENT_HANDLER(BT_HCI_EVT_MODE_CHANGE, bt_hci_mode_change,
+		      sizeof(struct bt_hci_evt_mode_change)),
 	EVENT_HANDLER(BT_HCI_EVT_PIN_CODE_REQ, bt_hci_pin_code_req,
 		      sizeof(struct bt_hci_evt_pin_code_req)),
 	EVENT_HANDLER(BT_HCI_EVT_LINK_KEY_NOTIFY, bt_hci_link_key_notify,

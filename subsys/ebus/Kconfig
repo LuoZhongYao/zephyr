@@ -1,0 +1,39 @@
+# Copyright (c) 2024 Rodrigo Peixoto <rodrigopex@gmail.com>
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig EBUS
+	bool "Ebus support"
+	depends on MULTITHREADING
+	help
+	  Enables support for Event publish-subscribe bus.
+
+if EBUS
+
+config EBUS_THREAD_STACK_SIZE
+	int "Ebus thread stack size"
+	default 4096 if COVERAGE
+	default 1024
+
+config EBUS_THREAD_PRIORITY
+	int "Ebus thread priority"
+	default 0
+	help
+	  By default, ebus thread priority is the highest preempt priority.
+
+config EBUS_NO_YIELD
+	bool "Select whether ebus yields"
+	help
+	  By default, the ebus yields between each event item, to
+	  prevent other threads from being starved.  Selecting this removes
+	  this yield, which may be useful if the ebus thread is cooperative
+	  and a sequence of event items is expected to complete without yielding.
+
+config EBUS_NUM_MSGQ
+	int "Number of maximum ebus msgq"
+	default 10
+
+module = EBUS
+module-str = ebus
+source "$ZEPHYR_BASE/subsys/logging/Kconfig.template.log_config"
+
+endif # EBUS

@@ -21,7 +21,7 @@ import sys
 import argparse
 import os
 import re
-from distutils.version import LooseVersion
+from packaging import version
 
 # --- debug stuff ---
 
@@ -90,9 +90,9 @@ def process_line(line, fp):
 
     m = re.search("gperf version (.*) [*][/]$", line)
     if m:
-        v = LooseVersion(m.groups()[0])
-        v_lo = LooseVersion("3.0")
-        v_hi = LooseVersion("3.1")
+        v = version.parse(m.groups()[0])
+        v_lo = version.parse("3.0")
+        v_hi = version.parse("3.1")
         if (v < v_lo or v > v_hi):
             warn("gperf %s is not tested, versions %s through %s supported" %
                  (v, v_lo, v_hi))
@@ -105,8 +105,8 @@ def process_line(line, fp):
     line = re.sub(r'[{]["]["][}]', r'{}', line)
 
     # Suppress a compiler warning since this table is no longer necessary
-    line = re.sub(r'static unsigned char lengthtable',
-                  r'static unsigned char __unused lengthtable', line)
+    line = re.sub(r'static (const )?unsigned char lengthtable',
+                  r'static const unsigned char __unused lengthtable', line)
 
     # drop all use of register keyword, let compiler figure that out,
     # we have to do this since we change stuff to take the address of some
@@ -134,7 +134,8 @@ def parse_args():
 
     parser = argparse.ArgumentParser(
         description=__doc__,
-        formatter_class=argparse.RawDescriptionHelpFormatter)
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        allow_abbrev=False)
 
     parser.add_argument("-i", "--input", required=True,
                         help="Input C file from gperf")

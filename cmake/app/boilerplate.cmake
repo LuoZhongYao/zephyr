@@ -34,7 +34,7 @@ cmake_policy(SET CMP0002 NEW)
 # Use the old CMake behaviour until the build scripts have been ported
 # to the new behaviour.
 # CMP0079: "target_link_libraries() allows use with targets in other directories"
-cmake_policy(SET CMP0079 OLD)
+# cmake_policy(SET CMP0079 OLD)
 
 define_property(GLOBAL PROPERTY ZEPHYR_LIBS
     BRIEF_DOCS "Global list of all Zephyr CMake libs that should be linked in"

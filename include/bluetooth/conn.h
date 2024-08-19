@@ -836,6 +836,8 @@ struct bt_conn_cb {
 	 */
 	void (*le_param_updated)(struct bt_conn *conn, uint16_t interval,
 				 uint16_t latency, uint16_t timeout);
+
+	void (*mode_changed)(struct bt_conn *conn, uint8_t mode, uint16_t interval);
 #if defined(CONFIG_BT_SMP)
 	/** @brief Remote Identity Address has been resolved.
 	 *

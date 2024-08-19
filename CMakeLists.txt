@@ -778,6 +778,29 @@ add_custom_command(
   )
 set_property(GLOBAL APPEND PROPERTY GENERATED_KERNEL_SOURCE_FILES dev_handles.c)
 
+if(CONFIG_EBUS)
+  add_custom_command(
+    OUTPUT ebus_hash.c ebus_hash_preprocessed.c ebus_hash.gperf
+    COMMAND ${PYTHON_EXECUTABLE}
+            ${ZEPHYR_BASE}/subsys/ebus/gen_ebus.py
+            --kernel $<TARGET_FILE:${ZEPHYR_PREBUILT_EXECUTABLE}>
+            --gperf ebus_hash.gperf
+            $<$<BOOL:${CMAKE_VERBOSE_MAKEFILE}>:--verbose>
+    COMMAND ${GPERF}
+            --output-file ebus_hash_preprocessed.c
+            ebus_hash.gperf
+    COMMAND
+          ${PYTHON_EXECUTABLE}
+          ${ZEPHYR_BASE}/scripts/process_gperf.py
+          -i ebus_hash_preprocessed.c
+          -o ebus_hash.c
+          -p "struct ebus_entry"
+          $<$<BOOL:${CMAKE_VERBOSE_MAKEFILE}>:--verbose>
+    DEPENDS ${ZEPHYR_PREBUILT_EXECUTABLE} ${ZEPHYR_BASE}/subsys/ebus/gen_ebus.py
+    )
+  set_property(GLOBAL APPEND PROPERTY GENERATED_KERNEL_SOURCE_FILES ebus_hash.c)
+endif()
+
 if(CONFIG_CODE_DATA_RELOCATION)
   # @Intent: Linker script to relocate .text, data and .bss sections
   toolchain_ld_relocation()

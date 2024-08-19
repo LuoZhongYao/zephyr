@@ -154,6 +154,19 @@ static void notify_disconnected(struct bt_conn *conn)
 	}
 }
 
+#if defined(CONFIG_BT_BREDR)
+void notify_mode_changed(struct bt_conn *conn)
+{
+	struct bt_conn_cb *cb;
+
+	for (cb = callback_list; cb; cb = cb->_next) {
+		if (cb->mode_changed) {
+			cb->mode_changed(conn, conn->br.mode, conn->br.interval);
+		}
+	}
+}
+#endif
+
 #if defined(CONFIG_BT_REMOTE_INFO)
 void notify_remote_info(struct bt_conn *conn)
 {

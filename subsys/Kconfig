@@ -62,4 +62,6 @@ source "subsys/tracing/Kconfig"
 
 source "subsys/demand_paging/Kconfig"
 
+source "subsys/ebus/Kconfig"
+
 endmenu

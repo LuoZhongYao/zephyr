@@ -2011,6 +2011,17 @@ struct bt_hci_evt_num_completed_packets {
 	struct bt_hci_handle_count h[0];
 } __packed;
 
+#define BT_HCI_EVT_MODE_CHANGE                  0x14
+#define BT_ACTIVE_MODE	0x00
+#define BT_HOLD_MODE	0x01
+#define BT_SNIFF_MODE	0x02
+struct bt_hci_evt_mode_change {
+	uint8_t  status;
+	uint16_t handle;
+	uint8_t  mode;
+	uint16_t interval;
+} __packed;
+
 #define BT_HCI_EVT_PIN_CODE_REQ                 0x16
 struct bt_hci_evt_pin_code_req {
 	bt_addr_t bdaddr;

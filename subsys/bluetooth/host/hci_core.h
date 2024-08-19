@@ -399,6 +399,7 @@ void bt_hci_le_scan_req_received(struct net_buf *buf);
 /* BR/EDR HCI event handlers */
 void bt_hci_conn_req(struct net_buf *buf);
 void bt_hci_conn_complete(struct net_buf *buf);
+void bt_hci_mode_change(struct net_buf *buf);
 
 
 void bt_hci_inquiry_complete(struct net_buf *buf);
