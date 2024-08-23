@@ -152,8 +152,8 @@ def main():
     subscribers = {}
     want_constants = set(["__ebus_subscriber_start",
                           "__ebus_subscriber_end",
-                          "__ebus_slot_namespace_start",
-                          "__ebus_slot_namespace_end",
+                          "__ebus_namespace_start",
+                          "__ebus_namespace_end",
                           "__ebus_slot_subscriber_start",
                           "__ebus_slot_subscriber_end"])
 

@@ -212,6 +212,9 @@ zephyr_compile_options($<TARGET_PROPERTY:compiler,no_common>)
 # @Intent: Set compiler specific flag for production of debug information
 zephyr_compile_options($<TARGET_PROPERTY:compiler,debug>)
 
+# @Intent: Set compiler specific flag for diagnostic messages
+zephyr_compile_options($<TARGET_PROPERTY:compiler,diagnostic>)
+
 zephyr_compile_options(
   ${TOOLCHAIN_C_FLAGS}
 )

@@ -16,11 +16,17 @@
 #else /* CONFIG_EBUS */
 
 #include <stdint.h>
+#include <sys/util.h>
 #include <toolchain.h>
 
 #define __ebustext __attribute__((__section__(".TEXT.ebus")))
 
-typedef void (*ebus_subscriber_t)(uint32_t ebus, void *userdata, void *appendix);
+union ebus_msg {
+	void *buffer;
+	uintptr_t num;
+};
+
+typedef void (*ebus_subscriber_t)(uint32_t ebus, void *userdata, union ebus_msg msg);
 
 struct ebus_subscriber {
 	void *userdata;
@@ -31,18 +37,13 @@ struct ebus_slot_subscriber {
 	uintptr_t ev;
 	const uint8_t *namespace;
 	const struct ebus_subscriber *subscriber;
-} ;
-
-struct ebus_publish {
-	void *appendix;
-	void (*drop)(struct ebus_publish *publish);
 };
 
 extern uint8_t __ebus_namespace_start[];
 extern uint8_t __ebus_namespace_end[];
 extern const struct ebus_subscriber __ebus_subscriber_start[];
 extern const struct ebus_subscriber __ebus_subscriber_end[];
-extern int ebus_publish(uint32_t ebus, struct ebus_publish *publish);
+extern int ebus_publish(uint32_t ebus, union ebus_msg msg, void (*completed)(union ebus_msg msg));
 
 #define EBUS_ORIGINAL(_namespace, _ev) (((uint32_t)(&EBUS_NAMESPACE(_namespace)) << 16) | (_ev))
 
@@ -53,8 +54,9 @@ extern int ebus_publish(uint32_t ebus, struct ebus_publish *publish);
 
 #define EBUS_NAMESPACE_DECLARE(_name) extern const uint8_t EBUS_NAMESPACE(_name)
 
-#define EBUS_PUBLISH(_namespace, _ev, ...)                                                         \
-	ebus_publish(EBUS_ORIGINAL(_namespace, _ev), GET_ARG_N(1, ##__VA_ARGS__, NULL))
+#define EBUS_PUBLISH(_namespace, _ev, _completed, ...)                                             \
+	ebus_publish(EBUS_ORIGINAL(_namespace, _ev),                                               \
+		     GET_ARG_N(1, ##__VA_ARGS__, (union ebus_msg){0}), _completed)
 
 #define _EBUS_SUBSCRIBE(_namespace, _ev, _subscriber, _userdata, _idx)                             \
 	static __attribute__((__section__(".__ebus_subscriber")))                                  \
@@ -72,7 +74,8 @@ extern int ebus_publish(uint32_t ebus, struct ebus_publish *publish);
 		.subscriber = &MACRO_MAP_CAT(UTIL_EXPAND, __ebus_, _namespace, _, _ev, _, _idx),   \
 	}
 
-#define EBUS_SUBSCRIBE(_namespace, _ev, _subscriber, _userdata)                                    \
-	_EBUS_SUBSCRIBE(_namespace, _ev, _subscriber, _userdata, __COUNTER__)
+#define EBUS_SUBSCRIBE(_namespace, _ev, _subscriber, ...)                                          \
+	_EBUS_SUBSCRIBE(_namespace, _ev, _subscriber, GET_ARG_N(1, ##__VA_ARGS__, NULL),           \
+			__COUNTER__)
 
 #endif /* CONFIG_EBUS */
