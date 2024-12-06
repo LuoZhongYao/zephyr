@@ -236,26 +236,26 @@ void z_log_minimal_hexdump_print(int level, const void *data, size_t size);
 void z_log_minimal_vprintk(const char *fmt, va_list ap);
 void z_log_minimal_printk(const char *fmt, ...);
 
-#define Z_LOG_TO_PRINTK(_level, fmt, ...)                                      \
-	do {                                                                   \
-		z_log_minimal_printk("[%10d] %c: " fmt "\n", k_uptime_get_32(), \
-				     z_log_minimal_level_to_char(_level),      \
-				     ##__VA_ARGS__);                           \
+#define Z_LOG_TO_PRINTK(_level, fmt, ...)                                                          \
+	do {                                                                                       \
+		z_log_minimal_printk("[%10d] %s%s: " fmt "\e[0m\n", k_uptime_get_32(),             \
+				     z_log_minimal_level_to_color(_level), __func__,               \
+				     ##__VA_ARGS__);                                               \
 	} while (false)
 
-static inline char z_log_minimal_level_to_char(int level)
+static inline const char *z_log_minimal_level_to_color(int level)
 {
 	switch (level) {
 	case LOG_LEVEL_ERR:
-		return 'E';
+		return "\e[31m";
 	case LOG_LEVEL_WRN:
-		return 'W';
+		return "\e[33m";
 	case LOG_LEVEL_INF:
-		return 'I';
+		return "\e[0m";
 	case LOG_LEVEL_DBG:
-		return 'D';
+		return "\e[0m";
 	default:
-		return '?';
+		return "\e[0m";
 	}
 }
 /******************************************************************************/

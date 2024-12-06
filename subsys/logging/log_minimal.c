@@ -52,8 +52,8 @@ static void minimal_hexdump_line_print(const char *data, size_t length)
 void z_log_minimal_hexdump_print(int level, const void *_data, size_t size)
 {
 	const char *data = (const char *)_data;
+	printk("%s: ", z_log_minimal_level_to_color(level));
 	while (size > 0) {
-		printk("%c: ", z_log_minimal_level_to_char(level));
 		minimal_hexdump_line_print(data, size);
 
 		if (size < HEXDUMP_BYTES_IN_LINE) {
@@ -63,4 +63,5 @@ void z_log_minimal_hexdump_print(int level, const void *_data, size_t size)
 		size -= HEXDUMP_BYTES_IN_LINE;
 		data += HEXDUMP_BYTES_IN_LINE;
 	}
+	printk("\e[0m");
 }

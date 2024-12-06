@@ -2972,6 +2972,11 @@ static uint8_t smp_pairing_req(struct bt_smp *smp, struct net_buf *buf)
 	rsp->init_key_dist = (req->init_key_dist & RECV_KEYS);
 	rsp->resp_key_dist = (req->resp_key_dist & SEND_KEYS);
 
+	if (bt_dev.id_addr[conn->id].type != BT_ADDR_LE_PUBLIC) {
+		rsp->init_key_dist &= ~BT_SMP_DIST_LINK_KEY;
+		rsp->resp_key_dist &= ~BT_SMP_DIST_LINK_KEY;
+	}
+
 	if ((rsp->auth_req & BT_SMP_AUTH_SC) &&
 	    (req->auth_req & BT_SMP_AUTH_SC)) {
 		atomic_set_bit(smp->flags, SMP_FLAG_SC);
