@@ -458,6 +458,7 @@ struct bt_sdp_record {
  * @return 0 in case of success or negative value in case of error.
  */
 int bt_sdp_register_service(struct bt_sdp_record *service);
+int bt_sdp_unregister_service(struct bt_sdp_record *service);
 
 /* Client API */
 
